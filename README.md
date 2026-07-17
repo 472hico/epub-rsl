@@ -66,7 +66,7 @@ license:
       currency: USD
       value: "0.01"
     accepts:
-      - type: application/x402+json
+      type: application/x402+json
 ```
 
 Embed the policy:
@@ -133,11 +133,11 @@ The command exits with status `1` when any error is found, making it suitable fo
 - `permits` and `prohibits` with `usage`, `user`, or `geo` scope
 - Payment types: `purchase`, `subscription`, `training`, `crawl`, `use`, `contribution`,
   `attribution`, and `free`
-- `amount`, `standard`, `custom`, and one or more `accepts` payment methods
+- `amount`, `standard`, `custom`, and one `accepts` payment method
 - `application/x402+json` payment declarations
 
-The validator recognizes the RSL 1.0 standard usage and user vocabularies. Unknown tokens are
-reported as warnings so extension vocabularies remain possible.
+The validator recognizes the RSL 1.0 standard usage and user vocabularies. Extension tokens must use
+a QName whose namespace is declared in the RSL XML.
 
 ## How embedding works
 

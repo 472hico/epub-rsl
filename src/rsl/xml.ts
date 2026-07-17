@@ -68,7 +68,8 @@ export function buildRslElement(policy: RslPolicy): XmlElement {
       custom.appendChild(document.createTextNode(paymentPolicy.custom));
       payment.appendChild(custom);
     }
-    for (const accepted of paymentPolicy.accepts ?? []) {
+    const accepted = paymentPolicy.accepts;
+    if (accepted) {
       const accepts = rslElement(document, "accepts");
       accepts.setAttribute("type", accepted.type);
       if (accepted.data !== undefined) {
@@ -144,11 +145,13 @@ function validateRules(license: XmlElement, issues: ValidationIssue[]): void {
             : type === "user"
               ? userTokens.has(token)
               : /^[A-Z]{2}$/.test(token);
-        if (!known) {
+        const extension = /^([A-Za-z_][\w.-]*):[A-Za-z_][\w.-]*$/.exec(token);
+        const extensionNamespace = extension ? rule.lookupNamespaceURI(extension[1]!) : null;
+        if (!known && (!extensionNamespace || extensionNamespace === RSL_NAMESPACE)) {
           issues.push({
-            level: "warning",
+            level: "error",
             code: "unknown-rule-token",
-            message: `${name} type="${type}" contains unknown token "${token}".`,
+            message: `${name} type="${type}" contains unknown or unqualified extension token "${token}".`,
           });
         }
       }
@@ -184,7 +187,15 @@ function validatePayment(license: XmlElement, issues: ValidationIssue[]): void {
       }
     }
 
-    for (const accepts of childElements(payment, "accepts")) {
+    const acceptedMethods = childElements(payment, "accepts");
+    if (acceptedMethods.length > 1) {
+      issues.push({
+        level: "error",
+        code: "multiple-accepts",
+        message: "RSL 1.0 payment may contain at most one accepts element.",
+      });
+    }
+    for (const accepts of acceptedMethods) {
       if (!accepts.getAttribute("type")) {
         issues.push({
           level: "error",
@@ -245,7 +256,15 @@ export function validateEmbeddedRsl(element: XmlElement): ValidationIssue[] {
 
   const server = content.getAttribute("server") ?? "";
   if (server) checkUrl(server, "content.server", issues);
-  if (content.getAttribute("encrypted") === "true" && !server) {
+  const encrypted = content.getAttribute("encrypted");
+  if (encrypted && !["true", "false"].includes(encrypted)) {
+    issues.push({
+      level: "error",
+      code: "invalid-encrypted",
+      message: 'content.encrypted must be lowercase "true" or "false".',
+    });
+  }
+  if (encrypted === "true" && !server) {
     issues.push({
       level: "error",
       code: "encrypted-without-server",

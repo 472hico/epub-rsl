@@ -66,7 +66,7 @@ license:
       currency: USD
       value: "0.01"
     accepts:
-      - type: application/x402+json
+      type: application/x402+json
 ```
 
 EPUBへ埋め込みます。
@@ -133,11 +133,11 @@ epub-rsl validate book.epub --json
 - `usage`、`user`、`geo`を対象にした`permits`と`prohibits`
 - `purchase`、`subscription`、`training`、`crawl`、`use`、`contribution`、
   `attribution`、`free`の各決済種別
-- `amount`、`standard`、`custom`、複数の`accepts`
+- `amount`、`standard`、`custom`、1つの`accepts`
 - `application/x402+json`によるx402利用宣言
 
-RSL 1.0標準のusage/user語彙は検証します。拡張語彙を妨げないよう、未知のトークンは
-エラーではなく警告にします。
+RSL 1.0標準のusage/user語彙を検証します。拡張トークンには、RSL XML内で名前空間を
+宣言したQNameが必要です。
 
 ## 埋め込み方法
 

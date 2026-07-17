@@ -34,7 +34,7 @@ const paymentSchema = z.object({
   amount: amountSchema.optional(),
   standard: urlSchema.optional(),
   custom: urlSchema.optional(),
-  accepts: z.array(acceptsSchema).optional(),
+  accepts: acceptsSchema.optional(),
 });
 
 export const policySchema = z.object({
@@ -43,16 +43,11 @@ export const policySchema = z.object({
     server: urlSchema.optional(),
     encrypted: z.boolean().optional(),
   }),
-  license: z
-    .object({
-      permits: z.array(ruleSchema).optional(),
-      prohibits: z.array(ruleSchema).optional(),
-      payment: paymentSchema.optional(),
-    })
-    .refine(
-      (license) => license.permits || license.prohibits || license.payment,
-      "license must define permits, prohibits, or payment",
-    ),
+  license: z.object({
+    permits: z.array(ruleSchema).optional(),
+    prohibits: z.array(ruleSchema).optional(),
+    payment: paymentSchema.optional(),
+  }),
 });
 
 export type RslPolicy = z.infer<typeof policySchema>;
@@ -68,7 +63,7 @@ export const examplePolicy: RslPolicy = {
     payment: {
       type: "use",
       amount: { currency: "USD", value: "0.01" },
-      accepts: [{ type: "application/x402+json" }],
+      accepts: { type: "application/x402+json" },
     },
   },
 };
