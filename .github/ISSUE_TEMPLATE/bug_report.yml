@@ -1,0 +1,28 @@
+name: Bug report
+description: Report incorrect EPUB or RSL processing
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Include the command, expected result, and actual result.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: epub-rsl version
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Node.js version and operating system
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Use a non-copyrighted minimal EPUB if a sample is needed.
+    validations:
+      required: true

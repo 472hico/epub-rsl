@@ -1,0 +1,66 @@
+{
+  "name": "epub-rsl",
+  "version": "0.1.0",
+  "description": "Safely embed and validate RSL 1.0 licensing metadata in EPUB files.",
+  "type": "module",
+  "bin": {
+    "epub-rsl": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ja.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run check"
+  },
+  "keywords": [
+    "epub",
+    "rsl",
+    "licensing",
+    "ai",
+    "cli"
+  ],
+  "author": "472hico",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/472hico/epub-rsl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/472hico/epub-rsl/issues"
+  },
+  "homepage": "https://github.com/472hico/epub-rsl#readme",
+  "dependencies": {
+    "@xmldom/xmldom": "^0.9.10",
+    "commander": "^14.0.3",
+    "yaml": "^2.9.0",
+    "yauzl": "^3.4.0",
+    "yazl": "^3.3.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
+    "@types/yauzl": "^3.4.0",
+    "@types/yazl": "^3.3.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10"
+  }
+}
