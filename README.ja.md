@@ -42,6 +42,18 @@ npm run build
 npm link
 ```
 
+## ウェブサイト
+
+https://472hico.github.io/epub-rsl/
+
+## デモ
+
+```bash
+./examples/run-demo.sh
+```
+
+付与前後の手順とサンプルEPUBは [examples/DEMO.md](examples/DEMO.md) を参照してください。
+
 ## クイックスタート
 
 ポリシーの雛形を作ります。

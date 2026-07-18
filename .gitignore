@@ -3,4 +3,5 @@ dist/
 coverage/
 *.log
 .DS_Store
+*.tgz
 tests/fixtures/generated/

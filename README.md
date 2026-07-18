@@ -42,6 +42,18 @@ npm run build
 npm link
 ```
 
+## Website
+
+https://472hico.github.io/epub-rsl/
+
+## Demo
+
+```bash
+./examples/run-demo.sh
+```
+
+See [examples/DEMO.md](examples/DEMO.md) for the before/after walkthrough and sample EPUB files.
+
 ## Quick start
 
 Create an example policy:

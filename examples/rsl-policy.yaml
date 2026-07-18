@@ -1,0 +1,20 @@
+content:
+  url: https://472hico.github.io/epub-rsl/examples/sample-book.epub
+  server: https://license.example.publisher
+license:
+  permits:
+    - type: usage
+      values:
+        - search
+        - ai-input
+  prohibits:
+    - type: usage
+      values:
+        - ai-train
+  payment:
+    type: use
+    amount:
+      currency: USD
+      value: "0.01"
+    accepts:
+      type: application/x402+json

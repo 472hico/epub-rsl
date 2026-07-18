@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>epub-rsl — Embed RSL licensing into EPUB</title>
+    <meta
+      name="description"
+      content="A CLI that safely embeds and validates Really Simple Licensing (RSL) 1.0 metadata in EPUB files."
+    />
+    <link rel="canonical" href="https://472hico.github.io/epub-rsl/" />
+    <meta property="og:title" content="epub-rsl" />
+    <meta
+      property="og:description"
+      content="Safely embed RSL 1.0 licensing metadata in EPUB files."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://472hico.github.io/epub-rsl/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #071018;
+        --ink-2: #0d1b28;
+        --mist: #d7e6f2;
+        --muted: #8aa3b8;
+        --accent: #5eead4;
+        --accent-deep: #14b8a6;
+        --warn: #fbbf24;
+        --line: rgba(215, 230, 242, 0.14);
+        --glow: rgba(94, 234, 212, 0.18);
+        --font-display: "Syne", sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--mist);
+        background: var(--ink);
+        font-family: var(--font-display);
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(ellipse 80% 55% at 12% -10%, var(--glow), transparent 55%),
+          radial-gradient(ellipse 60% 45% at 90% 10%, rgba(20, 184, 166, 0.12), transparent 50%),
+          linear-gradient(180deg, var(--ink-2), var(--ink) 42%, #050b11);
+        z-index: -2;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+        z-index: -1;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+      }
+
+      a:hover {
+        color: #a7f3e8;
+      }
+
+      .wrap {
+        width: min(1080px, calc(100% - 2.5rem));
+        margin-inline: auto;
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 0 0;
+        gap: 1rem;
+      }
+
+      .lang {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.15rem;
+        background: rgba(7, 16, 24, 0.45);
+      }
+
+      .lang button {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font: 500 0.8rem/1 var(--font-mono);
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+
+      .lang button[aria-pressed="true"] {
+        background: rgba(94, 234, 212, 0.14);
+        color: var(--accent);
+      }
+
+      .hero {
+        min-height: calc(100svh - 4rem);
+        display: grid;
+        align-content: center;
+        padding: 3.5rem 0 4rem;
+        gap: 1.25rem;
+      }
+
+      .brand {
+        margin: 0;
+        font-size: clamp(3.4rem, 11vw, 7.2rem);
+        font-weight: 800;
+        letter-spacing: -0.055em;
+        line-height: 0.92;
+        color: #f4fbff;
+        animation: rise 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+
+      .lead {
+        margin: 0;
+        max-width: 34rem;
+        font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+        font-weight: 500;
+        color: var(--muted);
+        animation: rise 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms both;
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        animation: rise 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 220ms both;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.85rem;
+        padding: 0.7rem 1.15rem;
+        border-radius: 0.55rem;
+        border: 1px solid transparent;
+        font: 700 0.95rem/1 var(--font-display);
+        letter-spacing: -0.02em;
+        text-decoration: none;
+        transition:
+          transform 180ms ease,
+          background 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #04201c;
+      }
+
+      .btn-primary:hover {
+        background: #99f6e4;
+        color: #04201c;
+      }
+
+      .btn-ghost {
+        border-color: var(--line);
+        color: var(--mist);
+        background: rgba(13, 27, 40, 0.55);
+      }
+
+      .install {
+        margin: 0.35rem 0 0;
+        width: min(100%, 34rem);
+        padding: 0.95rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 0.7rem;
+        background: rgba(5, 11, 17, 0.72);
+        color: var(--accent);
+        font: 500 0.92rem/1.45 var(--font-mono);
+        overflow-x: auto;
+        animation: rise 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 280ms both;
+      }
+
+      section {
+        padding: 4.5rem 0;
+        border-top: 1px solid var(--line);
+      }
+
+      section h2 {
+        margin: 0 0 0.75rem;
+        font-size: clamp(1.7rem, 4vw, 2.4rem);
+        letter-spacing: -0.04em;
+        font-weight: 700;
+      }
+
+      section p {
+        margin: 0;
+        max-width: 40rem;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .terminal {
+        margin-top: 1.5rem;
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        background: rgba(5, 11, 17, 0.8);
+        overflow: hidden;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      }
+
+      .terminal-bar {
+        display: flex;
+        gap: 0.4rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .terminal-bar span {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: rgba(215, 230, 242, 0.22);
+      }
+
+      .terminal pre {
+        margin: 0;
+        padding: 1.1rem 1.15rem 1.3rem;
+        overflow-x: auto;
+        font: 400 0.84rem/1.55 var(--font-mono);
+        color: #c8dceb;
+        white-space: pre;
+      }
+
+      .terminal .ok {
+        color: var(--accent);
+      }
+
+      .terminal .dim {
+        color: var(--muted);
+      }
+
+      .note {
+        margin-top: 1.25rem;
+        padding: 0.95rem 1rem;
+        border-left: 3px solid var(--warn);
+        background: rgba(251, 191, 36, 0.08);
+        color: #fde68a;
+        font-size: 0.95rem;
+        max-width: 42rem;
+      }
+
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem 1.25rem;
+        margin-top: 1.25rem;
+        font: 500 0.95rem/1 var(--font-mono);
+      }
+
+      footer {
+        padding: 2.5rem 0 3rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font: 400 0.85rem/1.5 var(--font-mono);
+      }
+
+      [data-lang="ja"] [data-i18n-en],
+      [data-lang="en"] [data-i18n-ja] {
+        display: none;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-lang="en">
+    <div class="wrap">
+      <header class="top">
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-set-lang="ja" aria-pressed="false">JA</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-label="Hero" style="border: 0; padding-top: 2rem">
+          <h1 class="brand">epub-rsl</h1>
+          <p class="lead" data-i18n-en>
+            Safely embed RSL 1.0 licensing metadata into EPUB files—so AI systems can read your
+            terms.
+          </p>
+          <p class="lead" data-i18n-ja>
+            EPUBへRSL 1.0の利用条件を安全に埋め込むCLI。AIが機械可読に条件を読めるようにします。
+          </p>
+          <div class="cta">
+            <a class="btn btn-primary" href="#demo" data-i18n-en>See the demo</a>
+            <a class="btn btn-primary" href="#demo" data-i18n-ja>デモを見る</a>
+            <a class="btn btn-ghost" href="https://github.com/472hico/epub-rsl">GitHub</a>
+            <a class="btn btn-ghost" href="https://www.npmjs.com/package/epub-rsl">npm</a>
+          </div>
+          <pre class="install"><code>npm install -g epub-rsl</code></pre>
+        </section>
+
+        <section id="demo">
+          <h2 data-i18n-en>Run it once</h2>
+          <h2 data-i18n-ja>一度実行する</h2>
+          <p data-i18n-en>
+            Inspect a sample EPUB, embed a policy, then validate. The source file is never
+            overwritten.
+          </p>
+          <p data-i18n-ja>
+            サンプルEPUBを確認し、ポリシーを埋め込み、検証します。原本は上書きされません。
+          </p>
+          <div class="terminal" aria-label="Demo terminal">
+            <div class="terminal-bar" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <pre><span class="dim">$</span> npx epub-rsl inspect sample-book.epub
+Title: A Quiet Protocol
+RSL: not embedded
+
+<span class="dim">$</span> npx epub-rsl apply sample-book.epub --policy rsl-policy.yaml
+Created sample-book.rsl.epub
+
+<span class="dim">$</span> npx epub-rsl validate sample-book.rsl.epub
+<span class="ok">PASS sample-book.rsl.epub</span></pre>
+          </div>
+          <div class="links">
+            <a href="./examples/sample-book.epub">sample-book.epub</a>
+            <a href="./examples/sample-book.rsl.epub">sample-book.rsl.epub</a>
+            <a href="./examples/rsl-policy.yaml">rsl-policy.yaml</a>
+            <a href="https://github.com/472hico/epub-rsl/blob/main/examples/DEMO.md">DEMO.md</a>
+          </div>
+        </section>
+
+        <section id="limits">
+          <h2 data-i18n-en>What this is / is not</h2>
+          <h2 data-i18n-ja>できること / できないこと</h2>
+          <p data-i18n-en>
+            RSL declares machine-readable terms that travel with the EPUB. It does not encrypt the
+            book, charge buyers, or stop unauthorized copying by itself.
+          </p>
+          <p data-i18n-ja>
+            RSLはEPUBと一緒に流通する機械可読な利用条件です。暗号化・課金・コピー防止は、
+            これ単体では行いません。
+          </p>
+          <p class="note" data-i18n-en>
+            Enforcement needs a license server, access control, EMS, CAP/OLP, or a payment protocol
+            such as x402.
+          </p>
+          <p class="note" data-i18n-ja>
+            強制にはライセンスサーバー、アクセス制御、EMS、CAP/OLP、x402などの決済が別途必要です。
+          </p>
+        </section>
+      </main>
+
+      <footer>
+        <div data-i18n-en>
+          Apache-2.0 · Built for publishers and publishing pipelines ·
+          <a href="https://rslstandard.org/">RSL</a>
+        </div>
+        <div data-i18n-ja>
+          Apache-2.0 · 出版社・出版制作パイプライン向け ·
+          <a href="https://rslstandard.org/">RSL</a>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const root = document.body;
+      const buttons = document.querySelectorAll("[data-set-lang]");
+
+      function setLang(lang) {
+        root.dataset.lang = lang;
+        buttons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.setLang === lang));
+        });
+        try {
+          localStorage.setItem("epub-rsl-lang", lang);
+        } catch {}
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => setLang(button.dataset.setLang));
+      });
+
+      try {
+        const saved = localStorage.getItem("epub-rsl-lang");
+        if (saved === "ja" || saved === "en") setLang(saved);
+        else if (navigator.language.toLowerCase().startsWith("ja")) setLang("ja");
+      } catch {}
+    </script>
+  </body>
+</html>
