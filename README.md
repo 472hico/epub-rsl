@@ -24,9 +24,15 @@ yet provide a license server, chapter-level API, DRM, EMS encryption, or x402 se
 - Node.js 20 or newer
 - npm 10 or newer
 
-## Install from source
+## Install
 
-The npm package is not published yet.
+```bash
+npm install -g epub-rsl
+# or without installing:
+npx epub-rsl --help
+```
+
+From source:
 
 ```bash
 git clone https://github.com/472hico/epub-rsl.git

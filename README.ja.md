@@ -24,9 +24,15 @@
 - Node.js 20以上
 - npm 10以上
 
-## ソースからインストール
+## インストール
 
-npmパッケージはまだ公開していません。
+```bash
+npm install -g epub-rsl
+# またはインストールせずに:
+npx epub-rsl --help
+```
+
+ソースから:
 
 ```bash
 git clone https://github.com/472hico/epub-rsl.git
